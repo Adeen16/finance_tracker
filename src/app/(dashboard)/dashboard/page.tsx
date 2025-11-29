@@ -2,10 +2,19 @@ import { api } from "@/services/api";
 import { ScoreCard } from "@/components/dashboard/ScoreCard";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { RevenueChart } from "@/components/dashboard/RevenueChart";
+import { CreditScore } from "@/components/dashboard/CreditScore";
+import { StreakHeader } from "@/components/dashboard/StreakHeader";
+import { calculateCreditScore, calculateStreak } from "@/lib/gamification";
 import { DollarSign, CreditCard, Activity, Droplets } from "lucide-react";
 
 export default async function DashboardPage() {
     const data = await api.getDashboardData("1"); // Mock user ID
+
+    // Calculate Gamification Metrics
+    const transactions = data.transactions || [];
+
+    const gigCreditScore = calculateCreditScore(transactions);
+    const streak = calculateStreak(transactions);
 
     return (
         <div className="space-y-6">
@@ -13,19 +22,22 @@ export default async function DashboardPage() {
                 <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
             </div>
 
+            {/* Streak & Level Header - Placed at top for engagement */}
+            <StreakHeader streak={streak} />
+
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <ScoreCard score={data.score} segment={data.segment} />
 
                 <MetricCard
                     title="Monthly Revenue"
-                    value={`$${data.revenue.toLocaleString()}`}
+                    value={`$${data.revenue.toLocaleString()} `}
                     description="+20.1% from last month"
                     icon={DollarSign}
                 />
 
                 <MetricCard
                     title="Expense Ratio"
-                    value={`${(data.expenseRatio * 100).toFixed(1)}%`}
+                    value={`${(data.expenseRatio * 100).toFixed(1)}% `}
                     description="Target: < 50%"
                     icon={CreditCard}
                 />
@@ -39,7 +51,11 @@ export default async function DashboardPage() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-                <RevenueChart />
+                <div className="col-span-4 space-y-4">
+                    {/* Credit Score Card - Placed above Revenue Chart as requested */}
+                    <CreditScore score={gigCreditScore} />
+                    <RevenueChart />
+                </div>
 
                 <div className="col-span-3 grid gap-4">
                     {/* Placeholder for recent activity or other widgets */}
