@@ -1,22 +1,40 @@
-import { api } from "@/services/api";
+"use client";
+
+import dynamic from 'next/dynamic';
+import { useGigFin } from "@/context/GigFinContext";
 import { ScoreCard } from "@/components/dashboard/ScoreCard";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { RevenueChart } from "@/components/dashboard/RevenueChart";
 import { CreditScore } from "@/components/dashboard/CreditScore";
 import { StreakHeader } from "@/components/dashboard/StreakHeader";
-import { AdvancedFeaturesGrid } from "@/components/dashboard/AdvancedFeaturesGrid";
-import { KarmaScoreDashboard } from "@/components/dashboard/KarmaScoreDashboard";
-import { calculateCreditScore, calculateStreak } from "@/lib/gamification";
-import { DollarSign, CreditCard, Activity, Droplets } from "lucide-react";
+import { TabbyCheckout } from "@/components/dashboard/TabbyCheckout";
 
-export default async function DashboardPage() {
-    const data = await api.getDashboardData("1"); // Mock user ID
+const AdvancedFeaturesGrid = dynamic(() => import("@/components/dashboard/AdvancedFeaturesGrid").then(mod => mod.AdvancedFeaturesGrid), { ssr: false });
+const KarmaScoreDashboard = dynamic(() => import("@/components/dashboard/KarmaScoreDashboard").then(mod => mod.KarmaScoreDashboard), { ssr: false });
+const QuickAddTransaction = dynamic(() => import("@/components/dashboard/QuickAddTransaction").then(mod => mod.QuickAddTransaction), { ssr: false });
+import { DollarSign, CreditCard, Droplets } from "lucide-react";
 
-    // Calculate Gamification Metrics
-    const transactions = data.transactions || [];
+export default function DashboardPage() {
+    const { transactions, userProfile, calculateKarmaScore } = useGigFin();
 
-    const gigCreditScore = calculateCreditScore(transactions);
-    const streak = calculateStreak(transactions);
+    // Derived Metrics
+    const karmaScore = calculateKarmaScore();
+
+    // Calculate Streak (Simplified for display)
+    // In a real app, this would be more robust, but we use the context's logic implicitly via KarmaScore or recalculate here
+    const streak = userProfile.appStreak; // Or calculate from transactions if preferred
+
+    // Calculate Financials
+    const totalRevenue = transactions
+        .filter(t => t.type === 'income')
+        .reduce((sum, t) => sum + t.amount, 0);
+
+    const totalExpenses = transactions
+        .filter(t => t.type === 'expense')
+        .reduce((sum, t) => sum + t.amount, 0);
+
+    const expenseRatio = totalRevenue > 0 ? totalExpenses / totalRevenue : 0;
+    const liquidityRatio = totalExpenses > 0 ? userProfile.currentBalance / totalExpenses : 0; // Simplified proxy
 
     return (
         <div className="space-y-6">
@@ -24,30 +42,30 @@ export default async function DashboardPage() {
                 <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
             </div>
 
-            {/* Streak & Level Header - Placed at top for engagement */}
+            {/* Streak & Level Header */}
             <StreakHeader streak={streak} />
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <ScoreCard score={data.score} segment={data.segment} />
+                <ScoreCard score={karmaScore} segment="Growth Striver" />
 
                 <MetricCard
-                    title="Monthly Revenue"
-                    value={`$${data.revenue.toLocaleString()}`}
-                    description="+20.1% from last month"
+                    title="Current Balance"
+                    value={`₹${userProfile.currentBalance.toLocaleString()}`}
+                    description="Available Liquidity"
                     icon={DollarSign}
                 />
 
                 <MetricCard
                     title="Expense Ratio"
-                    value={`${(data.expenseRatio * 100).toFixed(1)}%`}
+                    value={`${(expenseRatio * 100).toFixed(1)}%`}
                     description="Target: < 50%"
                     icon={CreditCard}
                 />
 
                 <MetricCard
-                    title="Liquidity Ratio"
-                    value={data.liquidityRatio.toFixed(2)}
-                    description="Target: > 1.8"
+                    title="Net Income"
+                    value={`₹${(totalRevenue - totalExpenses).toLocaleString()}`}
+                    description="Total Earnings - Expenses"
                     icon={Droplets}
                 />
             </div>
@@ -57,33 +75,32 @@ export default async function DashboardPage() {
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
                 <div className="col-span-4 space-y-4">
-                    {/* Credit Score Card - Placed above Revenue Chart as requested */}
-                    <CreditScore score={gigCreditScore} />
+                    <CreditScore score={karmaScore} />
                     <RevenueChart />
                 </div>
 
                 <div className="col-span-3 grid gap-4">
-                    {/* Placeholder for recent activity or other widgets */}
+                    <QuickAddTransaction />
+                    <TabbyCheckout />
+
+                    {/* Recent Activity */}
                     <div className="rounded-xl border bg-card text-card-foreground shadow">
                         <div className="flex flex-col space-y-1.5 p-6">
                             <h3 className="font-semibold leading-none tracking-tight">Recent Activity</h3>
                         </div>
                         <div className="p-6 pt-0">
-                            <div className="space-y-8">
-                                <div className="flex items-center">
-                                    <div className="ml-4 space-y-1">
-                                        <p className="text-sm font-medium leading-none">Uber Payout</p>
-                                        <p className="text-sm text-muted-foreground">Today, 9:00 AM</p>
+                            <div className="space-y-4">
+                                {transactions.slice(0, 5).map((t) => (
+                                    <div key={t.id} className="flex items-center">
+                                        <div className="ml-4 space-y-1">
+                                            <p className="text-sm font-medium leading-none">{t.category}</p>
+                                            <p className="text-sm text-muted-foreground">{t.date}</p>
+                                        </div>
+                                        <div className={`ml-auto font-medium ${t.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
+                                            {t.type === 'income' ? '+' : '-'}₹{t.amount}
+                                        </div>
                                     </div>
-                                    <div className="ml-auto font-medium">+$250.00</div>
-                                </div>
-                                <div className="flex items-center">
-                                    <div className="ml-4 space-y-1">
-                                        <p className="text-sm font-medium leading-none">Fuel Station</p>
-                                        <p className="text-sm text-muted-foreground">Yesterday, 8:30 PM</p>
-                                    </div>
-                                    <div className="ml-auto font-medium text-destructive">-$45.00</div>
-                                </div>
+                                ))}
                             </div>
                         </div>
                     </div>

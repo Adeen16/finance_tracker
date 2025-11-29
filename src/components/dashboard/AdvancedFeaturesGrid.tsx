@@ -9,14 +9,19 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Bot, AlertTriangle, Activity, Target, Zap } from "lucide-react";
 import { useMLSimulation } from "@/hooks/useMLSimulation";
+import { useGigFin } from "@/context/GigFinContext";
 import { cn } from "@/lib/utils";
 
 export function AdvancedFeaturesGrid() {
+    const { appConfig, updateAppConfig, userProfile } = useGigFin();
     const { autoPilotStatus, toggleAutoPilot, detectedLeaks, goals, runStressTest } = useMLSimulation();
 
-    // Local state for sliders
-    const [fuelPrice, setFuelPrice] = useState(102);
+    // Local state for order volume slider (simulation only)
     const [orderVolume, setOrderVolume] = useState(85);
+
+    // Use context for fuel price
+    const fuelPrice = appConfig.fuelPrice;
+    const setFuelPrice = (val: number) => updateAppConfig({ fuelPrice: val });
 
     const survivalScore = runStressTest(fuelPrice, orderVolume);
 
@@ -90,7 +95,7 @@ export function AdvancedFeaturesGrid() {
                     <CardContent className="space-y-4">
                         <div className="space-y-1">
                             <div className="flex justify-between text-xs">
-                                <span>Fuel Price</span>
+                                <span>Fuel Price (Global Config)</span>
                                 <span className="font-bold">₹{fuelPrice}</span>
                             </div>
                             <Slider
@@ -131,17 +136,17 @@ export function AdvancedFeaturesGrid() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                            <span className="font-bold">{goals.title}</span>
+                            <span className="font-bold">{userProfile.savingsGoal ? "Savings Goal" : goals.title}</span>
                             <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50">
                                 {goals.probability}% Probability
                             </Badge>
                         </div>
                         <div className="space-y-1">
                             <div className="flex justify-between text-xs text-muted-foreground">
-                                <span>₹{goals.current.toLocaleString()} saved</span>
-                                <span>Target: ₹{goals.target.toLocaleString()}</span>
+                                <span>₹{userProfile.currentBalance.toLocaleString()} available</span>
+                                <span>Target: ₹{userProfile.savingsGoal.toLocaleString()}</span>
                             </div>
-                            <Progress value={(goals.current / goals.target) * 100} className="h-2" />
+                            <Progress value={(userProfile.currentBalance / userProfile.savingsGoal) * 100} className="h-2" />
                         </div>
                         <div className="rounded-md bg-primary/5 p-3 text-xs text-primary">
                             <span className="font-bold">Recommendation:</span> Save ₹150 more daily to reach your goal by December.
