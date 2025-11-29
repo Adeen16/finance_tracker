@@ -4,6 +4,8 @@ import { MetricCard } from "@/components/dashboard/MetricCard";
 import { RevenueChart } from "@/components/dashboard/RevenueChart";
 import { CreditScore } from "@/components/dashboard/CreditScore";
 import { StreakHeader } from "@/components/dashboard/StreakHeader";
+import { AdvancedFeaturesGrid } from "@/components/dashboard/AdvancedFeaturesGrid";
+import { KarmaScoreDashboard } from "@/components/dashboard/KarmaScoreDashboard";
 import { calculateCreditScore, calculateStreak } from "@/lib/gamification";
 import { DollarSign, CreditCard, Activity, Droplets } from "lucide-react";
 
@@ -30,14 +32,14 @@ export default async function DashboardPage() {
 
                 <MetricCard
                     title="Monthly Revenue"
-                    value={`$${data.revenue.toLocaleString()} `}
+                    value={`$${data.revenue.toLocaleString()}`}
                     description="+20.1% from last month"
                     icon={DollarSign}
                 />
 
                 <MetricCard
                     title="Expense Ratio"
-                    value={`${(data.expenseRatio * 100).toFixed(1)}% `}
+                    value={`${(data.expenseRatio * 100).toFixed(1)}%`}
                     description="Target: < 50%"
                     icon={CreditCard}
                 />
@@ -49,6 +51,9 @@ export default async function DashboardPage() {
                     icon={Droplets}
                 />
             </div>
+
+            {/* KarmaScore & Salary-on-Demand Module */}
+            <KarmaScoreDashboard />
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
                 <div className="col-span-4 space-y-4">
@@ -84,6 +89,9 @@ export default async function DashboardPage() {
                     </div>
                 </div>
             </div>
+
+            {/* AI Financial Scientist Section */}
+            <AdvancedFeaturesGrid />
         </div>
     );
 }
