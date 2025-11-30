@@ -1,11 +1,7 @@
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
-try:
-    from backend.scchema.user_input import UserInput
-    from backend.pre import predict_output, model, MODEL_VERSION
-except ImportError:
-    from scchema.user_input import UserInput
-    from pre import predict_output, model, MODEL_VERSION
+from backend.scchema.user_input import UserInput
+from backend.pre import predict_output, model, MODEL_VERSION
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()

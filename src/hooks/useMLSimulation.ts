@@ -15,7 +15,7 @@ export interface Goal {
     probability: number;
 }
 
-export const useMLSimulation = (transactions: Transaction[] = [], currentBalance: number = 0, savingsGoal: number = 0) => {
+export const useMLSimulation = (transactions: Transaction[] = [], currentBalance: number = 0, goalsList: any[] = []) => {
     const [autoPilotStatus, setAutoPilotStatus] = useState(true);
 
     // Dynamic Leaks Detection
@@ -56,27 +56,60 @@ export const useMLSimulation = (transactions: Transaction[] = [], currentBalance
         return leaks.slice(0, 3); // Limit to top 3
     }, [transactions, currentBalance]);
 
-    // Dynamic Goal Probability
+    // Dynamic Goal Probability (Aggregate)
     const goals = useMemo(() => {
-        const progress = savingsGoal > 0 ? (currentBalance / savingsGoal) : 0;
-        // Probability increases with progress and recent income consistency (mocked consistency here)
+        // Calculate total target and current for all goals
+        const totalTarget = goalsList.reduce((sum, g) => sum + g.targetAmount, 0);
+        const totalCurrent = goalsList.reduce((sum, g) => sum + g.currentAmount, 0);
+
+        const progress = totalTarget > 0 ? (totalCurrent / totalTarget) : 0;
+        // Probability increases with progress
         const baseProb = Math.min(95, Math.round(progress * 100) + 10);
 
         return {
-            title: 'Savings Goal',
-            current: currentBalance,
-            target: savingsGoal,
+            title: 'Total Goals',
+            current: totalCurrent,
+            target: totalTarget,
             probability: Math.min(99, baseProb),
         };
-    }, [currentBalance, savingsGoal]);
+    }, [goalsList]);
 
-    const runStressTest = useCallback((fuelPrice: number, orderVolume: number) => {
+    const runStressTest = useCallback((
+        fuelPrice: number,
+        orderVolume: number,
+        medicalEmergency: boolean = false,
+        bikeRepair: number = 0,
+        challan: number = 0,
+        inflation: number = 0,
+        platformFee: number = 20
+    ) => {
         let score = 100;
-        if (fuelPrice > 90) score -= (fuelPrice - 90) * 1.5;
+
+        // 1. Fuel Price Impact (Base: 90)
+        if (fuelPrice > 90) score -= (fuelPrice - 90) * 1.2;
+
+        // 2. Order Volume Impact (Base: 100%)
         if (orderVolume < 100) score -= (100 - orderVolume) * 0.8;
         else score += (orderVolume - 100) * 0.2;
+
+        // 3. Medical Emergency (High Impact)
+        if (medicalEmergency) score -= 25;
+
+        // 4. Bike Repair & Challan (Direct Cost Impact relative to balance)
+        const totalOneTimeCost = bikeRepair + challan;
+        if (currentBalance > 0) {
+            const costRatio = totalOneTimeCost / currentBalance;
+            score -= costRatio * 50; // Significant penalty if costs eat up balance
+        } else if (totalOneTimeCost > 0) {
+            score -= 20; // Flat penalty if no balance
+        }
+
+        // 5. Inflation & Platform Fee (Margin Squeeze)
+        if (inflation > 6) score -= (inflation - 6) * 2;
+        if (platformFee > 20) score -= (platformFee - 20) * 1.5;
+
         return Math.max(0, Math.min(100, Math.round(score)));
-    }, []);
+    }, [currentBalance]);
 
     const toggleAutoPilot = () => setAutoPilotStatus(prev => !prev);
 

@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Activity, ShieldCheck, TrendingUp, Settings, FileText, Briefcase } from "lucide-react";
+import { LayoutDashboard, Activity, ShieldCheck, TrendingUp, Settings, Briefcase, Zap, Target } from "lucide-react";
 
 const navItems = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "Jobs", href: "/jobs", icon: Briefcase },
-    { name: "Analysis", href: "/analysis", icon: FileText },
+    { name: "Simulator", href: "/stress-simulator", icon: Zap },
+    { name: "Goals", href: "/goals", icon: Target },
     { name: "GigLens Score", href: "/giglens-score", icon: Activity },
     { name: "LeakShield", href: "/leakshield", icon: ShieldCheck },
     { name: "FlowForward", href: "/flowforward", icon: TrendingUp },

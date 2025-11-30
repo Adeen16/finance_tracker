@@ -114,7 +114,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             updateUserProfile({
                 name: user?.name || 'User',
                 currentBalance: Math.round(data.annualIncome / 12) - data.monthlyExpenses,
-                savingsGoal: Math.round(data.annualIncome * 0.2),
+                goals: [{
+                    id: 'init-1',
+                    title: 'Emergency Fund',
+                    targetAmount: Math.round(data.annualIncome * 0.2),
+                    currentAmount: 0,
+                    deadline: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString(),
+                    priority: 'High',
+                    category: 'Emergency'
+                }],
                 // Map ML predictions to profile
                 gigCreditScore: predictions.gig_credit_score || 650,
                 approvalProbability: predictions.approval_probability || 0,

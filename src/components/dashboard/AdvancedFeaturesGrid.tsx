@@ -7,27 +7,18 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Bot, AlertTriangle, Activity, Target, Zap } from "lucide-react";
+import { Bot, AlertTriangle, Activity, Zap } from "lucide-react";
 import { useMLSimulation } from "@/hooks/useMLSimulation";
 import { useGigFin } from "@/context/GigFinContext";
 import { cn } from "@/lib/utils";
 
 export function AdvancedFeaturesGrid() {
     const { appConfig, updateAppConfig, userProfile, transactions } = useGigFin();
-    const { autoPilotStatus, toggleAutoPilot, detectedLeaks, goals, runStressTest } = useMLSimulation(
+    const { autoPilotStatus, toggleAutoPilot, detectedLeaks } = useMLSimulation(
         transactions,
         userProfile.currentBalance,
-        userProfile.savingsGoal
+        userProfile.goals
     );
-
-    // Local state for order volume slider (simulation only)
-    const [orderVolume, setOrderVolume] = useState(85);
-
-    // Use context for fuel price
-    const fuelPrice = appConfig.fuelPrice;
-    const setFuelPrice = (val: number) => updateAppConfig({ fuelPrice: val });
-
-    const survivalScore = runStressTest(fuelPrice, orderVolume);
 
     return (
         <div className="space-y-4">
@@ -94,75 +85,9 @@ export function AdvancedFeaturesGrid() {
                     </CardContent>
                 </Card>
 
-                {/* 3. Stress-Test Simulator */}
-                <Card className="border-l-4 border-l-blue-500 bg-gradient-to-br from-card to-blue-500/5">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Stress-Test Simulator</CardTitle>
-                        <Activity className="h-4 w-4 text-blue-500" />
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="space-y-1">
-                            <div className="flex justify-between text-xs">
-                                <span>Fuel Price (Global Config)</span>
-                                <span className="font-bold">₹{fuelPrice}</span>
-                            </div>
-                            <Slider
-                                value={[fuelPrice]}
-                                min={90}
-                                max={120}
-                                step={1}
-                                onValueChange={(vals) => setFuelPrice(vals[0])}
-                                className="cursor-pointer"
-                            />
-                        </div>
-                        <div className="space-y-1">
-                            <div className="flex justify-between text-xs">
-                                <span>Order Volume</span>
-                                <span className="font-bold">{orderVolume}%</span>
-                            </div>
-                            <Slider
-                                value={[orderVolume]}
-                                min={50}
-                                max={150}
-                                step={5}
-                                onValueChange={(vals) => setOrderVolume(vals[0])}
-                                className="cursor-pointer"
-                            />
-                        </div>
-                        <div className="mt-4 rounded-lg bg-background/80 p-3 text-center border shadow-sm">
-                            <p className="text-xs text-muted-foreground mb-1">Survival Score</p>
-                            <div className={cn("text-3xl font-bold transition-colors duration-500", survivalScore > 80 ? "text-green-600" : survivalScore < 50 ? "text-destructive" : "text-yellow-600")}>
-                                {survivalScore}/100
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
 
-                {/* 4. Goal Planner */}
-                <Card className="border-l-4 border-l-purple-500 bg-gradient-to-br from-card to-purple-500/5">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Goal Planner</CardTitle>
-                        <Target className="h-4 w-4 text-purple-500" />
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between">
-                            <span className="font-bold">{goals.title}</span>
-                            <Badge variant="outline" className={cn("border-purple-200 bg-purple-50 text-purple-700", goals.probability > 80 ? "bg-green-50 text-green-700 border-green-200" : "")}>
-                                {goals.probability}% Probability
-                            </Badge>
-                        </div>
-                        <div className="space-y-1">
-                            <div className="flex justify-between text-xs text-muted-foreground">
-                                <span>₹{goals.current.toLocaleString()} available</span>
-                                <span>Target: ₹{goals.target.toLocaleString()}</span>
-                            </div>
-                            <Progress value={(goals.current / goals.target) * 100} className="h-2" />
-                        </div>
-                        <div className="rounded-md bg-purple-500/10 p-3 text-xs text-purple-700 dark:text-purple-300">
-                            <span className="font-bold">Recommendation:</span> Save ₹{Math.max(0, Math.round((goals.target - goals.current) / 90))} more daily to reach your goal by December.
-                        </div>
-                    </CardContent>
-                </Card>
+
+
             </div>
         </div>
     );

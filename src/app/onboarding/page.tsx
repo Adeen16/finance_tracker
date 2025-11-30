@@ -9,6 +9,9 @@ import { Slider } from "@/components/ui/slider";
 import { Loader2, TrendingUp, Wallet, PiggyBank, Briefcase } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
+import { CsvUploader } from "@/components/analysis/CsvUploader";
+import { parseCsv } from "@/lib/csv";
+
 export default function OnboardingPage() {
     const { completeOnboarding } = useAuth();
     const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -26,6 +29,19 @@ export default function OnboardingPage() {
 
     const handleChange = (field: string, value: number) => {
         setFormData(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleCsvUpload = async (file: File) => {
+        try {
+            const parsed = await parseCsv(file);
+            setFormData(prev => ({
+                ...prev,
+                annualIncome: Math.round(parsed.totalRevenue * 12),
+                monthlyExpenses: Math.round(parsed.totalExpenses)
+            }));
+        } catch (error) {
+            console.error("Error parsing CSV:", error);
+        }
     };
 
     const handleSubmit = async () => {
@@ -65,6 +81,16 @@ export default function OnboardingPage() {
                     <h1 className="text-3xl font-bold">Build Your Financial Profile</h1>
                     <p className="text-muted-foreground">Help our AI understand your gig economy patterns</p>
                 </div>
+
+                <Card className="border-dashed border-2 bg-primary/5">
+                    <CardHeader>
+                        <CardTitle className="text-base">Auto-fill with Bank Statement</CardTitle>
+                        <CardDescription>Upload your statement (CSV) to instantly populate these fields.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <CsvUploader onUpload={handleCsvUpload} />
+                    </CardContent>
+                </Card>
 
                 <Card>
                     <CardHeader>

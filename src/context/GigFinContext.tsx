@@ -28,6 +28,16 @@ export interface BankDetails {
     bankName: string;
 }
 
+export interface Goal {
+    id: string;
+    title: string;
+    targetAmount: number;
+    currentAmount: number;
+    deadline: string; // YYYY-MM-DD
+    priority: 'High' | 'Medium' | 'Low';
+    category: 'Personal' | 'Emergency' | 'Travel' | 'Gadget' | 'Work';
+}
+
 export interface UserProfile {
     name: string;
     age: number;
@@ -37,9 +47,11 @@ export interface UserProfile {
     location: string;
     bankDetails: BankDetails;
     currentBalance: number; // Acts as walletBalance
-    savingsGoal: number;
+    goals: Goal[];
     appStreak: number;
     theme: 'dark' | 'light';
+    annualIncome: number;
+    monthlyExpenses: number;
     // ML Predicted Fields
     gigCreditScore: number;
     approvalProbability: number;
@@ -92,9 +104,30 @@ const INITIAL_PROFILE: UserProfile = {
         bankName: 'HDFC Bank'
     },
     currentBalance: 4500,
-    savingsGoal: 50000,
+    goals: [
+        {
+            id: '1',
+            title: 'Emergency Fund',
+            targetAmount: 50000,
+            currentAmount: 15000,
+            deadline: '2024-12-31',
+            priority: 'High',
+            category: 'Emergency'
+        },
+        {
+            id: '2',
+            title: 'New Bike Battery',
+            targetAmount: 8000,
+            currentAmount: 2000,
+            deadline: '2024-06-30',
+            priority: 'Medium',
+            category: 'Work'
+        }
+    ],
     appStreak: 12,
     theme: 'light',
+    annualIncome: 300000,
+    monthlyExpenses: 15000,
     gigCreditScore: 650, // Default starting score
     approvalProbability: 0.5,
     maxLoanAmount: 10000
