@@ -21,6 +21,7 @@ export function StreakHeader({ streak }: StreakHeaderProps) {
                 <div>
                     <p className="text-sm font-medium text-muted-foreground">Daily Streak</p>
                     <h3 className="text-2xl font-bold">{streak} Days</h3>
+                    <p className="text-xs text-muted-foreground mt-1">Login everyday to not lose the streak.</p>
                 </div>
             </div>
 

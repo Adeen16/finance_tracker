@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useGigFin } from './GigFinContext';
+import { getGigWorkerPrediction } from '@/lib/api';
 
 interface User {
     email: string;
@@ -35,7 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const router = useRouter();
     const pathname = usePathname();
-    const { updateUserProfile } = useGigFin();
+    const { updateUserProfile, initializeUserTransactions } = useGigFin();
 
     // Load Auth State
     useEffect(() => {
@@ -85,42 +86,59 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsAuthenticated(false);
         setOnboardingComplete(false);
         localStorage.removeItem('gigfin_auth');
-        localStorage.removeItem('gigfin_data'); // Optional: Clear data on logout? Maybe keep for demo.
+        localStorage.removeItem('gigfin_data');
         router.push('/');
     };
 
-    const completeOnboarding = (data: FinancialData) => {
-        // --- Mock ML Logic ---
+    const completeOnboarding = async (data: FinancialData) => {
+        try {
+            // Prepare data for ML API
+            const predictionData = {
+                annual_income: data.annualIncome,
+                incentives: 2000, // Default or from form if added
+                platform_commission: 20, // Default
+                total_expenses: data.monthlyExpenses,
+                weekly_work_hours: 40, // Default
+                orders_per_month: 120, // Default
+                debt_amount: data.debtAmount,
+                savings_rate: data.savingsRate
+            };
 
-        // 1. Liquidity Ratio
-        // const liquidityRatio = data.annualIncome / (data.monthlyExpenses * 12);
+            // Call ML API
+            const response = await getGigWorkerPrediction(predictionData);
+            const { predictions } = response;
 
-        // 2. GigCreditScore
-        // If debt < 10000 -> 750, else 620
-        // We'll update this in the profile/context logic if needed, 
-        // but here we just simulate the "Analysis" and update the main Context.
+            console.log("ML Prediction Results:", predictions);
 
-        // 3. Survival Runway
-        // const survivalRunway = (data.savingsRate / 100) * data.annualIncome; // Very rough calc
+            // Update Global Context with Predicted values
+            updateUserProfile({
+                name: user?.name || 'User',
+                currentBalance: Math.round(data.annualIncome / 12) - data.monthlyExpenses,
+                savingsGoal: Math.round(data.annualIncome * 0.2),
+                // Map ML predictions to profile
+                gigCreditScore: predictions.gig_credit_score || 650,
+                approvalProbability: predictions.approval_probability || 0,
+                maxLoanAmount: predictions.max_loan_amount || 0
 
-        // Update Global Context with "Predicted" values
-        updateUserProfile({
-            name: user?.name || 'User',
-            currentBalance: Math.round(data.annualIncome / 12) - data.monthlyExpenses, // Initial balance estimate
-            savingsGoal: Math.round(data.annualIncome * 0.2), // Suggest 20% savings
-            // We could add more specific fields to UserProfile if needed
-        });
+            });
 
-        setOnboardingComplete(true);
+            // Generate Synthetic Transactions based on Input
+            initializeUserTransactions(data.annualIncome, data.monthlyExpenses);
 
-        // Update Persistence
-        localStorage.setItem('gigfin_auth', JSON.stringify({
-            user,
-            isAuthenticated: true,
-            onboardingComplete: true
-        }));
+            setOnboardingComplete(true);
 
-        router.push('/dashboard');
+            // Update Persistence
+            localStorage.setItem('gigfin_auth', JSON.stringify({
+                user,
+                isAuthenticated: true,
+                onboardingComplete: true
+            }));
+
+            router.push('/dashboard');
+        } catch (error) {
+            console.error("Onboarding Failed:", error);
+            alert("Financial Analysis failed. Please try again.");
+        }
     };
 
     return (

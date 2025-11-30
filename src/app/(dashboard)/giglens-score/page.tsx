@@ -1,10 +1,13 @@
+"use client";
+
 import { ScoreCard } from "@/components/dashboard/ScoreCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useGigFin } from "@/context/GigFinContext";
 
 export default function GigLensScorePage() {
-    // Mock data
-    const score = 78;
-    const segment = "Stable Compounding Earners";
+    const { calculateKarmaScore, userProfile } = useGigFin();
+    const score = calculateKarmaScore();
+    const segment = score >= 80 ? "Growth Striver" : score >= 50 ? "Stable Earner" : "Needs Improvement";
 
     return (
         <div className="space-y-6">

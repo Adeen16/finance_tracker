@@ -40,6 +40,10 @@ export interface UserProfile {
     savingsGoal: number;
     appStreak: number;
     theme: 'dark' | 'light';
+    // ML Predicted Fields
+    gigCreditScore: number;
+    approvalProbability: number;
+    maxLoanAmount: number;
 }
 
 export interface AppConfig {
@@ -59,6 +63,7 @@ interface GigFinContextType {
     updateAppConfig: (config: Partial<AppConfig>) => void;
     updateUserProfile: (profile: Partial<UserProfile>) => void;
     toggleTheme: () => void;
+    initializeUserTransactions: (income: number, expenses: number) => void;
 }
 
 // --- Initial Data ---
@@ -89,7 +94,10 @@ const INITIAL_PROFILE: UserProfile = {
     currentBalance: 4500,
     savingsGoal: 50000,
     appStreak: 12,
-    theme: 'light'
+    theme: 'light',
+    gigCreditScore: 650, // Default starting score
+    approvalProbability: 0.5,
+    maxLoanAmount: 10000
 };
 
 const INITIAL_CONFIG: AppConfig = {
@@ -243,6 +251,46 @@ export function GigFinProvider({ children }: { children: ReactNode }) {
         }));
     };
 
+    const initializeUserTransactions = (annualIncome: number, monthlyExpenses: number) => {
+        const newTransactions: Transaction[] = [];
+        const today = new Date();
+        const dailyIncome = Math.round(annualIncome / 365);
+        const dailyExpense = Math.round((monthlyExpenses * 12) / 365);
+
+        // Generate last 30 days of activity
+        for (let i = 0; i < 30; i++) {
+            const date = new Date();
+            date.setDate(today.getDate() - i);
+            const dateStr = date.toISOString().split('T')[0];
+
+            // Add Income (Daily Payout) - Randomize slightly
+            if (Math.random() > 0.1) { // 90% chance of working
+                newTransactions.push({
+                    id: `inc-${i}`,
+                    type: 'income',
+                    amount: Math.round(dailyIncome * (0.8 + Math.random() * 0.4)), // +/- 20%
+                    category: 'Uber',
+                    date: dateStr,
+                    description: 'Daily Payout'
+                });
+            }
+
+            // Add Expense (Fuel/Food)
+            if (Math.random() > 0.2) {
+                newTransactions.push({
+                    id: `exp-${i}`,
+                    type: 'expense',
+                    amount: Math.round(dailyExpense * (0.8 + Math.random() * 0.4)),
+                    category: Math.random() > 0.5 ? 'Fuel' : 'Food',
+                    date: dateStr,
+                    description: Math.random() > 0.5 ? 'Petrol' : 'Lunch'
+                });
+            }
+        }
+
+        setTransactions(newTransactions);
+    };
+
     return (
         <GigFinContext.Provider value={{
             transactions,
@@ -255,7 +303,8 @@ export function GigFinProvider({ children }: { children: ReactNode }) {
             calculateKarmaScore,
             updateAppConfig,
             updateUserProfile,
-            toggleTheme
+            toggleTheme,
+            initializeUserTransactions
         }}>
             {children}
         </GigFinContext.Provider>

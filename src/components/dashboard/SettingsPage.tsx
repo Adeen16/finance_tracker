@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle, User, Building, Settings as SettingsIcon, Moon, Sun, LogOut } from "lucide-react";
 import { useGigFin } from "@/context/GigFinContext";
 import { useAuth } from "@/context/AuthContext";
+import { BackendStatus } from "@/components/dashboard/BackendStatus";
 
 export function SettingsPage() {
     const { userProfile, updateUserProfile, toggleTheme } = useGigFin();
@@ -174,6 +175,8 @@ export function SettingsPage() {
                     <CardDescription>Customize your experience</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
+                    <BackendStatus />
+
                     <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
                             <Label className="text-base">Dark Mode</Label>

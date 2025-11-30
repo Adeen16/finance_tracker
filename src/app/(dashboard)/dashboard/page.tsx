@@ -10,7 +10,6 @@ import { StreakHeader } from "@/components/dashboard/StreakHeader";
 import { TabbyCheckout } from "@/components/dashboard/TabbyCheckout";
 
 const AdvancedFeaturesGrid = dynamic(() => import("@/components/dashboard/AdvancedFeaturesGrid").then(mod => mod.AdvancedFeaturesGrid), { ssr: false });
-const KarmaScoreDashboard = dynamic(() => import("@/components/dashboard/KarmaScoreDashboard").then(mod => mod.KarmaScoreDashboard), { ssr: false });
 const QuickAddTransaction = dynamic(() => import("@/components/dashboard/QuickAddTransaction").then(mod => mod.QuickAddTransaction), { ssr: false });
 import { DollarSign, CreditCard, Droplets } from "lucide-react";
 
@@ -70,12 +69,11 @@ export default function DashboardPage() {
                 />
             </div>
 
-            {/* KarmaScore & Salary-on-Demand Module */}
-            <KarmaScoreDashboard />
+
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
                 <div className="col-span-4 space-y-4">
-                    <CreditScore score={karmaScore} />
+                    <CreditScore score={userProfile.gigCreditScore} />
                     <RevenueChart />
                 </div>
 

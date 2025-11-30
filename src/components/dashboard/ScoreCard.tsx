@@ -19,8 +19,13 @@ export function ScoreCard({ score, segment }: ScoreCardProps) {
                 <div className={cn("text-4xl font-bold", colorClass)}>
                     {score}
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
                     {segment}
+                    {score !== 650 && (
+                        <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                            ML Verified ✓
+                        </span>
+                    )}
                 </p>
                 <div className="mt-4 h-2 w-full rounded-full bg-secondary">
                     <div

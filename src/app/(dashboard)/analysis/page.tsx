@@ -49,7 +49,7 @@ export default function AnalysisPage() {
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold text-green-600">
-                                    ${data.totalRevenue.toFixed(2)}
+                                    ₹{data.totalRevenue.toFixed(2)}
                                 </div>
                             </CardContent>
                         </Card>
@@ -59,7 +59,7 @@ export default function AnalysisPage() {
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold text-red-600">
-                                    ${data.totalExpenses.toFixed(2)}
+                                    ₹{data.totalExpenses.toFixed(2)}
                                 </div>
                             </CardContent>
                         </Card>
@@ -69,7 +69,7 @@ export default function AnalysisPage() {
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold">
-                                    ${(data.totalRevenue - data.totalExpenses).toFixed(2)}
+                                    ₹{(data.totalRevenue - data.totalExpenses).toFixed(2)}
                                 </div>
                             </CardContent>
                         </Card>
@@ -88,7 +88,7 @@ export default function AnalysisPage() {
                                             <p className="text-xs text-muted-foreground capitalize">{tx.type}</p>
                                         </div>
                                         <div className={tx.type === "income" ? "text-green-600" : "text-red-600"}>
-                                            {tx.type === "income" ? "+" : "-"}${tx.amount.toFixed(2)}
+                                            {tx.type === "income" ? "+" : "-"}₹{tx.amount.toFixed(2)}
                                         </div>
                                     </div>
                                 ))}
