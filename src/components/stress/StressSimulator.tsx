@@ -7,7 +7,7 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Activity, Zap, AlertTriangle, TrendingDown, TrendingUp, Info } from "lucide-react";
+import { Activity, Zap, AlertTriangle, TrendingDown, TrendingUp, Info, ShieldCheck } from "lucide-react";
 import { useMLSimulation } from "@/hooks/useMLSimulation";
 import { useGigFin } from "@/context/GigFinContext";
 import { cn } from "@/lib/utils";
@@ -29,34 +29,46 @@ export function StressSimulator() {
     // Calculate Score
     const survivalScore = runStressTest(fuelPrice, orderVolume, medicalEmergency, bikeRepair, challan, inflation, platformFee);
 
-    // Generate Projection Data
-    const projectionData = useMemo(() => {
+    // Reactive Data Generator for Chart
+    const chartData = useMemo(() => {
         const data = [];
-        let balance = userProfile.currentBalance;
-        // Simplified daily impact estimation
-        const dailyIncomeBase = (userProfile.annualIncome / 365);
-        const dailyExpenseBase = (userProfile.monthlyExpenses / 30);
-
-        // Apply stress factors
-        const incomeFactor = (orderVolume / 100) * (1 - (platformFee / 100));
-        const expenseFactor = 1 + ((inflation - 6) / 100) + ((fuelPrice - 90) / 90 * 0.3); // Fuel is ~30% of expense
-
-        const dailyNet = (dailyIncomeBase * incomeFactor) - (dailyExpenseBase * expenseFactor);
-
-        // One-time shocks
-        const oneTimeShock = (medicalEmergency ? 5000 : 0) + bikeRepair + challan;
-        balance -= oneTimeShock;
+        let currentBalance = userProfile.currentBalance || 0;
 
         for (let i = 0; i < 30; i++) {
-            balance += dailyNet;
+            // Daily Logic
+            // DailyIncome = (800 * (orderVolume / 100))
+            const dailyIncome = 800 * (orderVolume / 100);
+
+            // DailyFuelCost = (fuelPrice * 3)
+            const dailyFuelCost = fuelPrice * 3;
+
+            // DailyExpense = DailyFuelCost + (200 * (1 + inflation/100))
+            const dailyExpense = dailyFuelCost + (200 * (1 + inflation / 100));
+
+            // NetChange = DailyIncome - DailyExpense
+            const netChange = dailyIncome - dailyExpense;
+
+            // Accumulator
+            currentBalance += netChange;
+
+            // Shock Logic: If medicalEmergency is true, subtract 5000 from the balance on Day 5
+            if (i === 4 && medicalEmergency) {
+                currentBalance -= 5000;
+            }
+
+            // Include other manual shocks (Bike Repair, Challan) on Day 1 for completeness
+            if (i === 0) {
+                currentBalance -= (bikeRepair + challan);
+            }
+
+            // Push to Array
             data.push({
                 day: `Day ${i + 1}`,
-                balance: Math.round(balance),
-                threshold: 0
+                balance: Math.round(currentBalance),
             });
         }
         return data;
-    }, [userProfile, fuelPrice, orderVolume, medicalEmergency, bikeRepair, challan, inflation, platformFee]);
+    }, [userProfile.currentBalance, fuelPrice, orderVolume, inflation, medicalEmergency, bikeRepair, challan]);
 
     // Presets
     const applyPreset = (preset: string) => {
@@ -226,10 +238,10 @@ export function StressSimulator() {
                         </CardHeader>
                         <CardContent className="h-[300px]">
                             <ResponsiveContainer width="100%" height="100%">
-                                <LineChart data={projectionData}>
+                                <LineChart data={chartData}>
                                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
-                                    <XAxis dataKey="day" hide />
-                                    <YAxis />
+                                    <XAxis dataKey="day" />
+                                    <YAxis domain={['auto', 'auto']} />
                                     <Tooltip
                                         contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))' }}
                                         formatter={(value: number) => [`₹${value.toLocaleString()}`, 'Balance']}
@@ -238,8 +250,8 @@ export function StressSimulator() {
                                     <Line
                                         type="monotone"
                                         dataKey="balance"
-                                        stroke="hsl(var(--primary))"
-                                        strokeWidth={2}
+                                        stroke="#ef4444"
+                                        strokeWidth={3}
                                         dot={false}
                                     />
                                 </LineChart>
@@ -293,5 +305,3 @@ export function StressSimulator() {
         </div>
     );
 }
-
-import { ShieldCheck } from "lucide-react";

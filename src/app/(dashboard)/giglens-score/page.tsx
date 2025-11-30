@@ -3,7 +3,7 @@
 import { ScoreCard } from "@/components/dashboard/ScoreCard";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useGigFin } from "@/context/GigFinContext";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell, LabelList } from 'recharts';
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, Users, Award } from "lucide-react";
 
@@ -60,17 +60,17 @@ export default function GigLensScorePage() {
                                 <AreaChart data={historyData}>
                                     <defs>
                                         <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                                            <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                                            <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3} />
+                                            <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
                                         </linearGradient>
                                     </defs>
-                                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
-                                    <XAxis dataKey="month" />
+                                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" vertical={false} />
+                                    <XAxis dataKey="month" tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
                                     <YAxis domain={[500, 850]} hide />
                                     <Tooltip
                                         contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))' }}
                                     />
-                                    <Area type="monotone" dataKey="score" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorScore)" />
+                                    <Area type="monotone" dataKey="score" stroke="#22c55e" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" />
                                 </AreaChart>
                             </ResponsiveContainer>
                         </CardContent>
@@ -131,15 +131,16 @@ export default function GigLensScorePage() {
                         </CardHeader>
                         <CardContent className="h-[200px]">
                             <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={peerData}>
+                                <BarChart data={peerData} margin={{ top: 20, right: 0, left: 0, bottom: 0 }}>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-muted/30" />
-                                    <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                                    <XAxis dataKey="name" tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
                                     <YAxis hide />
                                     <Tooltip cursor={{ fill: 'transparent' }} contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))' }} />
                                     <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                                         {peerData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={entry.name === 'You' ? 'hsl(var(--primary))' : 'hsl(var(--muted))'} />
+                                            <Cell key={`cell-${index}`} fill={entry.name === 'You' ? '#eab308' : '#4b5563'} />
                                         ))}
+                                        <LabelList dataKey="value" position="top" className="fill-foreground font-bold text-xs" />
                                     </Bar>
                                 </BarChart>
                             </ResponsiveContainer>
