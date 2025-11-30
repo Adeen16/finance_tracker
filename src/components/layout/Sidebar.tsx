@@ -13,6 +13,7 @@ const navItems = [
     { name: "GigLens Score", href: "/giglens-score", icon: Activity },
     { name: "LeakShield", href: "/leakshield", icon: ShieldCheck },
     { name: "FlowForward", href: "/flowforward", icon: TrendingUp },
+    { name: "Tabby (Prototype)", href: "/demo/repair-scenario", icon: Zap },
     { name: "Settings", href: "/settings", icon: Settings },
 ];
 
