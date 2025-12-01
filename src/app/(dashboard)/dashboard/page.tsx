@@ -7,7 +7,6 @@ import { MetricCard } from "@/components/dashboard/MetricCard";
 import { RevenueChart } from "@/components/dashboard/RevenueChart";
 import { CreditScore } from "@/components/dashboard/CreditScore";
 import { StreakHeader } from "@/components/dashboard/StreakHeader";
-import { TabbyCheckout } from "@/components/dashboard/TabbyCheckout";
 
 const AdvancedFeaturesGrid = dynamic(() => import("@/components/dashboard/AdvancedFeaturesGrid").then(mod => mod.AdvancedFeaturesGrid), { ssr: false });
 const QuickAddTransaction = dynamic(() => import("@/components/dashboard/QuickAddTransaction").then(mod => mod.QuickAddTransaction), { ssr: false });
@@ -79,7 +78,6 @@ export default function DashboardPage() {
 
                 <div className="col-span-3 grid gap-4">
                     <QuickAddTransaction />
-                    <TabbyCheckout />
 
                     {/* Recent Activity */}
                     <div className="rounded-xl border bg-card text-card-foreground shadow">
